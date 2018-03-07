@@ -5,9 +5,11 @@ from colorama import init, Fore, Back, Style
 from termcolor import colored
 import webbrowser
 import json
+import os.path
 
 headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'}
 
+# DEPRECATED
 def isWeekDay(day):
 	weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 	for weekday in weekdays:
@@ -48,11 +50,28 @@ def searchRARBGAPI(query):
 		except:
 			pass
 	
+def checkDownloaded(episode_list):
+	downloaded = open("downloaded.txt","r")
+	down_append = open("downloaded.txt","a")
+	
+	new_list = []
+	lines = downloaded.read().splitlines()
+	for episode in episode_list:
+		if episode not in lines:
+			new_list.append(episode)
+			down_append.write(episode+'\n')
+			
+	down_append.close()
+	downloaded.close()
+	return new_list
+	
 url = 'https://www.pogdesign.co.uk/cat/'
 init()
 
 soup = return_soup(url)
+# Opening files
 series = open("series.txt","r")
+
 lines = series.read().splitlines()
 today = datetime.datetime.today().day
 dayPrinted = False
@@ -85,30 +104,36 @@ for day in soup.findAll(True, {'class':['day','today']}):
 					dayPrinted = True
 				print(colored('\t'+link.text + ' ' + links[index+1].text, 'yellow'))
 	dayPrinted = False
-
+# Checking if already downloaded episode
+episodes = checkDownloaded(episodes)
 print(colored('#############################################', 'green'))
 print(colored('Looking for torrents of:', 'green'))
-print(colored('#############################################', 'green'))
 print(colored(episodes, 'yellow'))
+print(colored('#############################################', 'green'))
+
 link_list = []
+
 for each in episodes:
-	# result = searchRARBG(each)
 	result = searchRARBGAPI(each)
 	if result:
 		print (colored('Magnet for %s:','green') % (each))
 		print (colored('%s','yellow') % (result))
 		link_list.append(result)
+		answer = input('Do you wish to download now? ')
+		if answer == 'Y' or answer == 'y':
+			webbrowser.open(link)
 	else:
 		print(colored('Something went wrong on %s.','red') % (each))
 
-answer = input('Open links in browser? Y/N >> ')
-if (answer == 'Y' or answer == 'y' ):
-	for link in link_list:
-		webbrowser.open(link)
-		answer = input('Open next? Y/N >> ')
-		if(answer == 'Y' or answer =='y'):
-			continue
-		else:
-			break
+if not episodes:
+	print(colored('You seem to be up to date with your shows.', 'green'))
 
+if not os.path.isfile("downloaded.txt"):
+	downloaded = open("downloaded.txt","w")
+	for episode in episodes:
+		downloaded.write(episode+'\n')
+	downloaded.close()
+	
+series.close()
+			
 input('DONE')
