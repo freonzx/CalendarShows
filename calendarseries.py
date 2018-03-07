@@ -121,7 +121,7 @@ for each in episodes:
 		link_list.append(result)
 		answer = input('Do you wish to download now? ')
 		if answer == 'Y' or answer == 'y':
-			webbrowser.open(link)
+			webbrowser.open(result)
 	else:
 		print(colored('Something went wrong on %s.','red') % (each))
 
@@ -135,5 +135,5 @@ if not os.path.isfile("downloaded.txt"):
 	downloaded.close()
 	
 series.close()
-			
-input('DONE')
+print(colored('\nALL DONE.', 'cyan'))
+input()
