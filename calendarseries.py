@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import datetime
 from colorama import init, Fore, Back, Style
 from termcolor import colored
+import webbrowser
+import json
 
 headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'}
 
@@ -18,7 +20,9 @@ def return_soup(url):
 	plain_text = source_code.text
 	soup = BeautifulSoup(plain_text, "html.parser")
 	return soup
-	
+
+# Actually found this https://torrentapi.org/apidocs_v2.txt might be implementing this instead this ugly thing
+# DEPRECATED
 def searchRARBG(query):
 	url = 'https://rarbg.is/torrents.php?category=18;41;49&search='+query+'&order=seeders&by=DESC'
 	soup = return_soup(url)
@@ -27,7 +31,23 @@ def searchRARBG(query):
 			if '/torrent/' in k['href']:
 				return 'https://rarbg.is'+k['href']
 	return False
-
+# New function using API
+def searchRARBGAPI(query):
+	url = 'https://torrentapi.org/pubapi_v2.php?'
+	source_code = requests.get(url+'get_token=get_token', headers=headers)
+	token=json.loads(source_code.text)
+	if not token['token']:
+		print('Something went wrong on getting token.')
+		return False
+	else:
+		try:
+			string_q = 'mode=search&search_string='+query+'&sort=seeders&token='+token['token']
+			req = requests.get(url+string_q, headers=headers)
+			req_parsed = json.loads(req.text)
+			return req_parsed['torrent_results'][0]['download']
+		except:
+			pass
+	
 url = 'https://www.pogdesign.co.uk/cat/'
 init()
 
@@ -70,11 +90,25 @@ print(colored('#############################################', 'green'))
 print(colored('Looking for torrents of:', 'green'))
 print(colored('#############################################', 'green'))
 print(colored(episodes, 'yellow'))
+link_list = []
 for each in episodes:
-	result = searchRARBG(each)
+	# result = searchRARBG(each)
+	result = searchRARBGAPI(each)
 	if result:
-		print (colored(result,'yellow'))
+		print (colored('Magnet for %s:','green') % (each))
+		print (colored('%s','yellow') % (result))
+		link_list.append(result)
 	else:
-		print(colored('Something went wrong','red'))
-		
+		print(colored('Something went wrong on %s.','red') % (each))
+
+answer = input('Open links in browser? Y/N >> ')
+if (answer == 'Y' or answer == 'y' ):
+	for link in link_list:
+		webbrowser.open(link)
+		answer = input('Open next? Y/N >> ')
+		if(answer == 'Y' or answer =='y'):
+			continue
+		else:
+			break
+
 input('DONE')
