@@ -70,9 +70,13 @@ def checkDownloaded(episode_list):
 	return new_list
 	
 def download_prompt(url):
-	answer = input('Do you wish to download now? ')
-	if answer == 'Y' or answer == 'y':
-		webbrowser.open(url)
+	while True:
+		answer = input('Do you wish to download now? ')
+		if answer == 'Y' or answer == 'y':
+			webbrowser.open(url)
+			break
+		elif answer == 'N' or answer == 'n':
+			break
 
 def menu():
 	os.system('cls')
@@ -100,11 +104,15 @@ def menu():
 				
 				for index in range(len(magnet)):
 					print( colored('Option %d: %s', 'yellow') % (index, magnet[index]['filename']) )
-
-				index = int(input('Select one option: '))
-				print ( colored('Magnet for %s.', 'green') % (magnet[index]['filename']))
-				print ( colored(magnet[index]['download'], 'yellow'))
-				download_prompt(magnet[index]['download'])
+					
+				try:
+					index = int(input('Select one option: '))
+					print ( colored('Magnet for %s.', 'green') % (magnet[index]['filename']))
+					print ( colored(magnet[index]['download'], 'yellow'))
+					download_prompt(magnet[index]['download'])
+				except:
+					print(Fore.RED + 'Something went wrong.')
+					sleep(3)
 		else:
 			print ( colored('Something went wrong.', 'red'))
 			sleep(3)
