@@ -36,7 +36,7 @@ def searchRARBG(query):
 	return False
 # New function using API
 def searchRARBGAPI(query, value='all'):
-	url = 'https://torrentapi.org/pubapi_v2.php?'
+	url = 'https://torrentapi.org/pubapi_v2.php?app_id=CalendarSeries&'
 	source_code = requests.get(url+'get_token=get_token', headers=headers)
 	token=json.loads(source_code.text)
 	if not token['token']:
