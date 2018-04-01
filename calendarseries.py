@@ -95,24 +95,26 @@ def menu():
 		answer = input('>> ')
 		if answer:
 			magnet = searchRARBGAPI(answer)
-			if magnet == False:
+			while not magnet:
 				print ( colored('Something went wrong, nothing was found.', 'red'))
-				sleep(3)
-			else:
-				# print ( colored('Magnet for %s.', 'green') % (answer))
-				# print ( colored(magnet, 'yellow'))
+				try_answer = input('Try again?')
+				print('>> ')
+				if try_answer == 'y' or try_answer == 'Y':
+					magnet = searchRARBGAPI(answer)
+				else:
+					break
 				
-				for index in range(len(magnet)):
-					print( colored('Option %d: %s', 'yellow') % (index, magnet[index]['filename']) )
-					
-				try:
-					index = int(input('Select one option: '))
-					print ( colored('Magnet for %s.', 'green') % (magnet[index]['filename']))
-					print ( colored(magnet[index]['download'], 'yellow'))
-					download_prompt(magnet[index]['download'])
-				except:
-					print(Fore.RED + 'Something went wrong.')
-					sleep(3)
+			for index in range(len(magnet)):
+				print( colored('Option %d: %s', 'yellow') % (index, magnet[index]['filename']) )
+				
+			try:
+				index = int(input('Select one option: '))
+				print ( colored('Magnet for %s.', 'green') % (magnet[index]['filename']))
+				print ( colored(magnet[index]['download'], 'yellow'))
+				download_prompt(magnet[index]['download'])
+			except:
+				print(Fore.RED + 'Something went wrong.')
+				sleep(3)
 		else:
 			print ( colored('Something went wrong.', 'red'))
 			sleep(3)
@@ -173,13 +175,17 @@ def calendar_check():
 
 	for each in episodes:
 		result = searchRARBGAPI(each,'magnet')
-		if result:
-			print (colored('Magnet for %s:','green') % (each))
-			print (colored('%s','yellow') % (result))
-			link_list.append(result)
-			download_prompt(result)
-		else:
+		while not result:
 			print(colored('Something went wrong on %s.','red') % (each))
+			answer = input('Try again?')
+			if answer == 'y' or answer == 'Y':
+				result = searchRARBGAPI(each,'magnet')
+			else:
+				break
+		print (colored('Magnet for %s:','green') % (each))
+		print (colored('%s','yellow') % (result))
+		link_list.append(result)
+		download_prompt(result)		
 
 	if not episodes:
 		print(colored('You seem to be up to date with your shows.', 'green'))
